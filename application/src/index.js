@@ -1,14 +1,24 @@
+require('dotenv').config()
+
 const express = require('express');
 const { PORT } = require('./config');
-const { databaseConnection } = require('./database');
+// const { databaseConnection } = require('./database');
 const expressApp = require('./express-app');
 const { CreateChannel } = require('./utils')
 
+
+
+// if (process.env.NODE_ENV !== "prod") {
+//   const configFile = `./.env.${process.env.NODE_ENV}`;
+//   dotEnv.config({ path: configFile });
+// } else {
+//   dotEnv.config();
+// }
 const StartServer = async() => {
 
     const app = express();
     
-    await databaseConnection();
+    // await databaseConnection();
 
     const channel = await CreateChannel()
 
