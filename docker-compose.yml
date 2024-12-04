@@ -1,0 +1,62 @@
+version: "1"
+services:
+  # RabbitMQ Service (1 instance)
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_ERLANG_COOKIE=secretcookie
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # RabbitMQ Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq-net
+    restart: always
+
+  # Application microservice
+  application:
+    build: ./application
+    container_name: application
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_QUEUE=task_queue
+    networks:
+      - rabbitmq-net
+    restart: always
+
+    # Traefik (Optional, for routing traffic to the Node.js applications)
+  # traefik:
+  #   image: "traefik:v2.10"
+  #   container_name: traefik
+  #   command:
+  #     - "--api.insecure=true"  # Enable web UI
+  #     - "--providers.docker=true"  # Enable Docker provider
+  #     - "--entryPoints.web.address=:80"  # HTTP Entry point
+  #   ports:
+  #     - "80:80"      # HTTP
+  #     - "8080:8080"  # Traefik Dashboard
+  #   networks:
+  #     - rabbitmq-net
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #   restart: always
+
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./proxy
+    depends_on:
+      - application
+    ports:
+      - 80:80
+
+# networks:
+#   rabbitmq-net:
+#     driver: bridge
+
+# volumes:
+#   rabbitmq-data:
