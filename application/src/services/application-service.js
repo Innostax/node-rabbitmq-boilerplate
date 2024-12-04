@@ -15,7 +15,7 @@ class CustomerService {
 
 
   HealthCheck = () => {
-    return "/Application : This is message service";
+    return "/Application : This is Application service";
   };
 
   async SubscribeEvents(payload) {
