@@ -4,8 +4,6 @@ require('dotenv').config()
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
-console.log("DB_HOST","hjfhjdfhdjhfjdhj")
-console.log(process.env.DB_USER)
 
 module.exports = {
     client: 'pg',
@@ -19,5 +17,8 @@ module.exports = {
     pool: {
       min: 2,
       max: 10
+    },
+    migrations: {
+      tableName: 'knex_migrations'
     }
 };
