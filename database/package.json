@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "knex": "^3.1.0",
+    "dotenv": "^8.6.0",
+    "pg": "^8.13.1"
+  },
+  "scripts": {
+    "start":"npx knex migrate:latest"
+  }
+}

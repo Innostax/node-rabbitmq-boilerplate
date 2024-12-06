@@ -18,6 +18,9 @@ services:
     container_name: application
     env_file:
       - ./application/.env.dev
+    depends_on:
+      - database
+      - rabbitmq 
     ports:
       - "8001:8001"
     # networks:
@@ -43,6 +46,31 @@ services:
   #   volumes:
   #     - "/var/run/docker.sock:/var/run/docker.sock"
   #   restart: always
+  database:
+    image: postgres
+    container_name: database
+    restart: always
+    ports:
+      - 6543:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=innostax_boilerplate
+    volumes:
+      - pgdata:/data/postgres
+    
+  migrate:
+    build: ./database
+    container_name: migrate
+    env_file:
+      - ./database/.env.dev
+    depends_on:
+      - database
+    # networks:
+    #   - rabbitmq-net
+    volumes:
+      - .:/app/
+      - /app/database/node_modules
 
   nginx-proxy:
     build:
@@ -59,3 +87,5 @@ services:
 
 volumes:
   rabbitmq-data:
+  pgdata:
+    driver: local
