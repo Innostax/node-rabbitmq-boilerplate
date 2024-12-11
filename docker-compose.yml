@@ -79,7 +79,7 @@ services:
     depends_on:
       - application
     ports:
-      - 8084:8084
+      - 80:80
 
 # networks:
 #   rabbitmq-net:
