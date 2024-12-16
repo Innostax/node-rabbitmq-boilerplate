@@ -11,6 +11,12 @@ services:
     # networks:
     #   - rabbitmq-net
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
 
   # Application microservice
   application:
@@ -18,9 +24,6 @@ services:
     container_name: application
     env_file:
       - ./application/.env.dev
-    depends_on:
-      - database
-      - rabbitmq 
     ports:
       - "8001:8001"
     # networks:
@@ -29,23 +32,17 @@ services:
       - .:/app/
       - /app/application/node_modules
     restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/whoami"]  # Assuming your app has a health check endpoint
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
-    # Traefik (Optional, for routing traffic to the Node.js applications)
-  # traefik:
-  #   image: "traefik:v2.10"
-  #   container_name: traefik
-  #   command:
-  #     - "--api.insecure=true"  # Enable web UI
-  #     - "--providers.docker=true"  # Enable Docker provider
-  #     - "--entryPoints.web.address=:80"  # HTTP Entry point
-  #   ports:
-  #     - "80:80"      # HTTP
-  #     - "8080:8080"  # Traefik Dashboard
-  #   networks:
-  #     - rabbitmq-net
-  #   volumes:
-  #     - "/var/run/docker.sock:/var/run/docker.sock"
-  #   restart: always
+ 
   database:
     image: postgres
     container_name: database
@@ -77,7 +74,8 @@ services:
       dockerfile: Dockerfile
       context: ./proxy
     depends_on:
-      - application
+      application:
+        condition: service_healthy                                                                                                                                                                                                                                                                                  
     ports:
       - 80:80
 
